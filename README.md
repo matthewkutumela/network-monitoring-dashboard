@@ -63,4 +63,22 @@
 
 ---
 
-## 📁 Project Structure
+## 📁 Project Structure 
+```
+network-monitoring-dashboard/
+│
+├── assets/
+├── css/
+├── js/
+├── screenshots/
+│
+├── index.html
+├── about.html
+├── login.html
+├── dashboard.html
+├── services.html
+├── contact.html
+│
+└── README.md
+```
+
