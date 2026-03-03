@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Network Monitoring System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a365d',  
+                        secondary: '#2c5282',  
+                        accent: '#d69e2e',     
+                        light: '#e2e8f0',
+                        dark: '#2d3748',      
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .hero-pattern {
+            background-color: #1a365d;
+            background-image: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gradient-border {
+            position: relative;
+            border-radius: 0.5rem;
+        }
+        
+        .gradient-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #1a365d, #d69e2e, #2c5282);
+            border-radius: 0.6rem;
+            z-index: -1;
+        }
+        
+        .logo-img {
+            height: 70px;
+            width: auto;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        /* Animation for location pin */
+        @keyframes pinBounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0) scale(1);}
+            40% {transform: translateY(-15px) scale(1.1);}
+            60% {transform: translateY(-7px) scale(1.05);}
+        }
+        
+        .animate-pin {
+            animation: pinBounce 2s infinite;
+        }
+        
+        /* Animation for phone icon */
+        @keyframes phoneRing {
+            0%, 10%, 20%, 30%, 40%, 50%, 60%, 70%, 80%, 90% {
+                transform: rotate(0deg);
+            }
+            5%, 15% {
+                transform: rotate(15deg);
+            }
+            25%, 35% {
+                transform: rotate(-15deg);
+            }
+            45%, 55% {
+                transform: rotate(10deg);
+            }
+            65%, 75% {
+                transform: rotate(-10deg);
+            }
+            85%, 95% {
+                transform: rotate(5deg);
+            }
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+        
+        .animate-phone {
+            animation: phoneRing 3s infinite;
+            transform-origin: center center;
+        }
+        
+        /* Animation for envelope */
+        @keyframes envelopeOpen {
+            0% {
+                content: "\f0e0"; /* closed envelope */
+            }
+            50% {
+                content: "\f2b6"; /* open envelope */
+            }
+            100% {
+                content: "\f0e0"; /* closed envelope */
+            }
+        }
+        
+        .animate-envelope::before {
+            animation: envelopeOpen 4s infinite;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+        
+        /* Map pin animation in the map section */
+        .map-pin {
+            position: relative;
+            display: inline-block;
+            animation: pinBounce 3s infinite;
+        }
+        
+        /* Hover effects for icons */
+        .contact-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .contact-icon:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header/Navigation -->
+    <header class="bg-primary shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="text-white text-2xl font-bold">
+    
+                </div>
+                <nav class="hidden md:block">
+                    <ul class="flex space-x-8">
+                        <li><a href="landing.html" class="text-light hover:text-accent transition">Home</a></li>
+                        <li><a href="about.html" class="text-light hover:text-accent transition">About</a></li>
+                        <li><a href="services.html" class="text-light hover:text-accent transition">Services</a></li>
+                        <li><a href="contact.html" class="text-light hover:text-accent transition">Contact</a></li>
+                </nav>
+                <button class="md:hidden text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-pattern text-white py-16 md:py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
+            <p class="text-xl max-w-3xl mx-auto">Get in touch with our team for network monitoring solutions and support</p>
+        </div>
+    </section>
+
+    <!-- Contact Content Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-12">
+                <!-- Contact Information -->
+                <div class="lg:w-2/5">
+                    <h2 class="text-3xl font-bold text-primary mb-8">Get In Touch</h2>
+                    
+                    <div class="space-y-8">
+                        <div class="flex items-start">
+                            <div class="bg-primary p-3 rounded-full mr-4 flex-shrink-0 contact-icon">
+                                <i class="fas fa-map-marker-alt text-accent text-xl animate-pin"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-primary mb-2">Address</h3>
+                                <p class="text-dark">678 Rivonia Road,<br>Johannesburg, 2000<br>South Africa</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-primary p-3 rounded-full mr-4 flex-shrink-0 contact-icon">
+                                <i class="fas fa-phone text-accent text-xl animate-phone"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-primary mb-2">Phone</h3>
+                                <p class="text-dark">+27 11 143 4507</p>
+                                <p class="text-dark">+27 11 855 7090</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-primary p-3 rounded-full mr-4 flex-shrink-0 contact-icon">
+                                <i class="fas fa-envelope text-accent text-xl animate-envelope"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-primary mb-2">Email</h3>
+                                <p class="text-dark">info@abtkworld.co.za</p>
+                                <p class="text-dark">support@abkworld.co.za</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="bg-primary p-3 rounded-full mr-4 flex-shrink-0 contact-icon">
+                                <i class="fas fa-clock text-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-primary mb-2">Business Hours</h3>
+                                <p class="text-dark">Monday - Friday: 8:00 AM - 16:00 PM</p>
+                                <p class="text-dark">Saturday: 9:00 AM - 1:00 PM</p>
+                                <p class="text-dark">Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10">
+                        <h3 class="text-xl font-semibold text-primary mb-4">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="bg-primary hover:bg-secondary text-white p-3 rounded-full transition duration-300">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="bg-primary hover:bg-secondary text-white p-3 rounded-full transition duration-300">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="bg-primary hover:bg-secondary text-white p-3 rounded-full transition duration-300">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="bg-primary hover:bg-secondary text-white p-3 rounded-full transition duration-300">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div class="lg:w-3/5">
+                    <div class="bg-light p-8 rounded-xl shadow-md">
+                        <h2 class="text-3xl font-bold text-primary mb-6">Send Us a Message</h2>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-dark font-medium mb-2">Your Name</label>
+                                    <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition duration-300" placeholder="Enter your name">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-dark font-medium mb-2">Your Email</label>
+                                    <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition duration-300" placeholder="Enter your email">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="subject" class="block text-dark font-medium mb-2">Subject</label>
+                                <input type="text" id="subject" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition duration-300" placeholder="Enter subject">
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="block text-dark font-medium mb-2">Your Message</label>
+                                <textarea id="message" rows="5" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition duration-300" placeholder="Enter your message"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-accent hover:bg-yellow-600 text-primary font-semibold py-3 px-8 rounded-lg transition duration-300">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-primary text-center mb-12">Our Location</h2>
+            <div class="map-container gradient-border relative" style="height:400px;">
+              <!-- Google Maps iframe for ABT Telecoms, 204 Rivonia Road, Sandton -->
+              <iframe
+                src="https://www.google.com/maps?q=ABT+Telecoms,+204+Rivonia+Rd,+Sandton,+South+Africa&output=embed"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-primary text-center mb-12">Frequently Asked Questions</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-light p-6 rounded-xl contact-card transition duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-3 flex items-center">
+                        <i class="fas fa-question-circle text-accent mr-3"></i>
+                        What support options are available?
+                    </h3>
+                    <p class="text-dark">We offer 24/7 technical support for all our network monitoring solutions, including phone, email, and remote assistance.</p>
+                </div>
+                
+                <div class="bg-light p-6 rounded-xl contact-card transition duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-3 flex items-center">
+                        <i class="fas fa-question-circle text-accent mr-3"></i>
+                        How quickly can you respond to emergencies?
+                    </h3>
+                    <p class="text-dark">Our emergency response team can typically address critical network issues within 1 hour of notification.</p>
+                </div>
+                
+                <div class="bg-light p-6 rounded-xl contact-card transition duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-3 flex items-center">
+                        <i class="fas fa-question-circle text-accent mr-3"></i>
+                        Do you offer customized solutions?
+                    </h3>
+                    <p class="text-dark">Yes, we specialize in creating tailored network monitoring solutions to meet your specific business requirements.</p>
+                </div>
+                
+                <div class="bg-light p-6 rounded-xl contact-card transition duration-300">
+                    <h3 class="text-xl font-semibold text-primary mb-3 flex items-center">
+                        <i class="fas fa-question-circle text-accent mr-3"></i>
+                        What is your typical implementation timeline?
+                    </h3>
+                    <p class="text-dark">Implementation timelines vary based on project complexity, but most standard installations are completed within 2-4 weeks.</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="text-accent hover:text-yellow-700 font-semibold flex items-center justify-center">
+                    <span>View all FAQs</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 hero-pattern">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Get Started?</h2>
+            <p class="text-light text-xl max-w-2xl mx-auto mb-8">Contact us today to discuss your network monitoring needs and get a customized solution.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button class="bg-accent hover:bg-yellow-600 text-primary font-semibold py-3 px-8 rounded-lg transition duration-300">
+                    <i class="fas fa-phone-alt mr-2"></i>Call Now
+                </button>
+                <button class="bg-transparent hover:bg-secondary text-white font-semibold py-3 px-8 rounded-lg border-2 border-white transition duration-300">
+                    <i class="fas fa-envelope mr-2"></i>Email Us
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">
+                        ABKWorld
+                    </h3>
+                    <p class="text-light">Enterprise-grade network monitoring and management solutions.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="home.html" class="text-light hover:text-accent transition">Home</a></li>
+                        <li><a href="services.html" class="text-light hover:text-accent transition">Services</a></li>
+                        <li><a href="about.html" class="text-light hover:text-accent transition">About Us</a></li>
+                        <li><a href="contact.html" class="text-light hover:text-accent transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-light hover:text-accent transition">Network Monitoring</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Performance Management</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Security Solutions</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Cloud Integration</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                            <span class="text-light">678 Rivonia Street, Johannesburg</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-accent"></i>
+                            <span class="text-light">+27 11 123 4567</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-accent"></i>
+                            <span class="text-light">info@abkworld.co.za</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-secondary mt-8 pt-8 text-center text-light">
+                <p> 2025 ABKWorld. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

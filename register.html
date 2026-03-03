@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABK World - Register</title>
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles for the floating circles */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+        .circle-1 {
+            width: 80px;
+            height: 80px;
+            background: #00a8ff;
+            top: 20px;
+            left: 30px;
+            animation: float 8s infinite ease-in-out;
+        }
+        .circle-2 {
+            width: 60px;
+            height: 60px;
+            background: #004d80;
+            top: 70px;
+            right: 30px;
+            animation: float 6s infinite ease-in-out;
+            animation-delay: 1s;
+        }
+        .circle-3 {
+            width: 40px;
+            height: 40px;
+            background: #00c2ff;
+            bottom: 30px;
+            left: 60px;
+            animation: float 7s infinite ease-in-out;
+            animation-delay: 2s;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-15px) translateX(10px); }
+            50% { transform: translateY(5px) translateX(-10px); }
+            75% { transform: translateY(-5px) translateX(-5px); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex items-center justify-center p-4">
+    <div id="root" class="w-full max-w-3xl"></div>
+
+    <script type="text/babel">
+        // Registration Form Component
+        const RegisterForm = () => {
+            const [name, setName] = React.useState('');
+            const [email, setEmail] = React.useState('');
+            const [password, setPassword] = React.useState('');
+            const [confirmPassword, setConfirmPassword] = React.useState('');
+            const [isLoading, setIsLoading] = React.useState(false);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                
+                // Simple validation
+                if (name.length < 2) {
+                    alert('Please enter your full name.');
+                    return;
+                }
+                
+                if (!validateEmail(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long.');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+                
+                setIsLoading(true);
+                
+                // Simulate registration process
+                setTimeout(() => {
+                    setIsLoading(false);
+                    
+                    // Check if user is already logged in
+                    if (localStorage.getItem('isLoggedIn') === 'true') {
+                        // Check if user explicitly wants to register again
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const forceRegister = urlParams.get('forceRegister');
+                        
+                        if (!forceRegister) {
+                            window.location.href = 'dashboard.html';
+                            return;
+                        }
+                    }
+                    
+                    // Store user data and login state
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', email);
+                    localStorage.setItem('userName', name);
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            };
+            
+            const validateEmail = (email) => {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col md:flex-row w-full">
+                    {/* Left Panel */}
+                    <div className="w-full md:w-2/5 bg-gradient-to-b from-blue-600 to-blue-900 text-white p-6 flex flex-col justify-center items-center">
+                        <div className="relative w-40 h-40 mb-6">
+                            <div className="circle circle-1"></div>
+                            <div className="circle circle-2"></div>
+                            <div className="circle circle-3"></div>
+                        </div>
+                        <h2 className="text-xl font-bold text-center mb-3">Join ABK World</h2>
+                        <p className="text-sm text-center text-blue-100">Create an account to access our telecommunications services and solutions.</p>
+                    </div>
+
+                    {/* Right Panel */}
+                    <div className="w-full md:w-3/5 p-6 md:p-8">
+                        <h2 className="text-2xl font-bold text-blue-600 text-center mb-6">Create Account</h2>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i className="fas fa-user text-blue-500"></i>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="register-name"
+                                    placeholder="Full Name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i className="fas fa-envelope text-blue-500"></i>
+                                </div>
+                                <input
+                                    type="email"
+                                    id="register-email"
+                                    placeholder="Email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i className="fas fa-lock text-blue-500"></i>
+                                </div>
+                                <input
+                                    type="password"
+                                    id="register-password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i className="fas fa-lock text-blue-500"></i>
+                                </div>
+                                <input
+                                    type="password"
+                                    id="register-confirm"
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className={`w-full py-2 px-4 rounded-md text-white font-medium ${isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} transition-colors`}
+                            >
+                                {isLoading ? 'Creating account...' : 'Sign Up'}
+                            </button>
+                        </form>
+                        
+                        <div className="mt-4 text-center text-sm text-gray-600">
+                            Already have an account? <a href="login.html" className="text-blue-600 font-medium hover:underline">Sign In</a>
+                        </div>
+                        
+                        <p className="text-xs text-center text-gray-500 mt-4">
+                            By creating an account, you agree to our <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
+                        </p>
+                        
+                        <div className="mt-4 text-center">
+                            <a href="landing.html" className="text-blue-600 text-sm hover:underline">
+                                <i className="fas fa-arrow-left mr-1"></i> Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RegisterForm />);
+    </script>
+</body>
+</html>

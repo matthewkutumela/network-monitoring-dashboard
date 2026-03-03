@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABK World - Network Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0033a0;
+            --secondary: #00a0e1;
+            --accent: #ff8200;
+            --light: #f5f7fa;
+            --dark: #1a1a1a;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            
+            /* Light mode (default) */
+            --bg-color: #f8f9fa;
+            --text-color: #1a1a1a;
+            --card-bg: white;
+            --header-border: #e9ecef;
+            --table-header-bg: #f8f9fa;
+            --table-hover: #f8f9fa;
+            --sidebar-bg: #0033a0;
+            --sidebar-text: rgba(255, 255, 255, 0.8);
+            --sidebar-hover: rgba(255, 255, 255, 0.1);
+            --sidebar-active: rgba(255, 255, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --map-bg: #eef2f7;
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e6e6e6;
+            --card-bg: #1e1e1e;
+            --header-border: #2d2d2d;
+            --table-header-bg: #2d2d2d;
+            --table-hover: #2d2d2d;
+            --sidebar-bg: #0a1f3a;
+            --sidebar-text: rgba(255, 255, 255, 0.8);
+            --sidebar-hover: rgba(255, 255, 255, 0.1);
+            --sidebar-active: rgba(255, 255, 255, 0.15);
+            --shadow-color: rgba(0, 0, 0, 0.2);
+            --map-bg: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            transition: background-color 0.3s;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo img {
+            height: 60px; /* Increased logo size from 40px to 60px */
+            width: auto;
+        }
+
+        .logo span {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: var(--sidebar-hover);
+            color: white;
+        }
+
+        .nav-links i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: var(--card-bg);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .notification-panel.open {
+            right: 0;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: var(--light);
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification-item.critical {
+            border-left-color: var(--danger);
+        }
+
+        .notification-item.warning {
+            border-left-color: var(--warning);
+        }
+
+        .notification-item.info {
+            border-left-color: var(--secondary);
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            padding: 1.5rem 2rem;
+            transition: background-color 0.3s;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--header-border);
+            transition: border-color 0.3s;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.75rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.users {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success);
+        }
+
+        .stat-icon.towers {
+            background: rgba(0, 123, 255, 0.15);
+            color: var(--primary);
+        }
+
+        .stat-icon.faults {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--danger);
+        }
+
+        .stat-icon.traffic {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--warning);
+        }
+
+        .stat-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-bottom: 2rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--header-border);
+            transition: border-color 0.3s;
+        }
+
+        .section-header h2 {
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        /* Search and Filters */
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 40px;
+            border: 1px solid var(--header-border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--header-border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            min-width: 150px;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1rem;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--header-border);
+            transition: border-color 0.3s;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--table-header-bg);
+            transition: background-color 0.3s;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: var(--table-hover);
+            transition: background-color 0.3s;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--danger);
+        }
+
+        .status-progress {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--warning);
+        }
+
+        .status-resolved {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success);
+        }
+
+        .status-offline {
+            background: rgba(108, 117, 125, 0.15);
+            color: var(--gray);
+        }
+
+        .view-btn {
+            padding: 0.4rem 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+
+        .view-btn:hover {
+            background: #00257a;
+        }
+
+        /* Network Status Specific Styles */
+        .network-map {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-bottom: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+            background: var(--map-bg);
+            border-radius: 8px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .tower-node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .tower-node.online {
+            background: var(--success);
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
+        }
+
+        .tower-node.offline {
+            background: var(--danger);
+            box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.3);
+        }
+
+        .tower-node.warning {
+            background: var(--warning);
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.3);
+        }
+
+        .tower-node::after {
+            content: attr(data-id);
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+
+        .connection-line {
+            position: absolute;
+            background: rgba(0, 123, 255, 0.3);
+            transform-origin: 0 0;
+            z-index: 1;
+        }
+
+        .tower-details {
+            display: none;
+            position: absolute;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            z-index: 100;
+            width: 250px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .tower-details h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .tower-details p {
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* User Management Styles */
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            margin-bottom: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-details h3 {
+            margin-bottom: 0.25rem;
+            color: var(--primary);
+        }
+
+        .user-details p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Analytics Styles */
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            margin-bottom: 2rem;
+            height: 300px;
+            position: relative;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-options {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-options button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--header-border);
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chart-options button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .chart-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        /* Settings Styles */
+        .settings-category {
+            margin-bottom: 2rem;
+        }
+
+        .settings-category h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--header-border);
+            transition: border-color 0.3s;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            margin-bottom: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-info h4 {
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+
+        .setting-info p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-modal-content {
+            background: var(--card-bg);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--header-border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .search-box, .filter-select {
+                min-width: 100%;
+            }
+            
+            .network-map {
+                height: 300px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        /* Page Content */
+        .page-content {
+            display: block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+               
+                <span>ABK World</span>
+            </div>
+            
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                <li><a href="#" data-page="network-status"><i class="fas fa-network-wired"></i> Network Status</a></li>
+                <li><a href="#" data-page="user-management"><i class="fas fa-users"></i> User Management</a></li>
+                <li><a href="#" data-page="fault-reports"><i class="fas fa-exclamation-circle"></i> Fault Reports</a></li>
+                <li><a href="#" data-page="analytics"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+                <li><a href="#" data-page="settings"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- Notification Panel -->
+        <div class="notification-panel" id="notification-panel">
+            <div class="notification-header">
+                <h3>Notifications</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div id="notification-list">
+                <!-- Notifications will be added dynamically -->
+            </div>
+        </div>
+
+        <!-- Profile Modal -->
+        <div class="profile-modal" id="profile-modal">
+            <div class="profile-modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>User Profile</h2>
+                <form class="profile-form" id="profile-form">
+                    <div class="form-group">
+                        <label for="profile-name">Full Name</label>
+                        <input type="text" id="profile-name" value="Mathews Kutumela">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-email">Email</label>
+                        <input type="email" id="profile-email" value="matthewkutumela@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-role">Role</label>
+                        <input type="text" id="profile-role" value="System Administrator" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-phone">Phone Number</label>
+                        <input type="tel" id="profile-phone" value="+27 123 456 789">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="view-btn" id="cancel-profile">Cancel</button>
+                        <button type="submit" class="view-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page-content">
+                <div class="header">
+                    <h1>Network Dashboard</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="stats-grid">
+                    <div class="stat-card" data-page="user-management">
+                        <div class="stat-icon users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>1,248</h3>
+                            <p>Active Users</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-page="network-status">
+                        <div class="stat-icon towers">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>42</h3>
+                            <p>Towers Online</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-page="fault-reports">
+                        <div class="stat-icon faults">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>7</h3>
+                            <p>Active Faults</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card" data-page="analytics">
+                        <div class="stat-icon traffic">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>2.4 GB/s</h3>
+                            <p>Network Traffic</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tower Connections Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Tower Connections</h2>
+                    </div>
+                    
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search by Tower ID or Location..." id="tower-search">
+                        </div>
+                        <select class="filter-select" id="tower-region-filter">
+                            <option>All Towers</option>
+                            <option>North Region</option>
+                            <option>South Region</option>
+                            <option>East Region</option>
+                            <option>West Region</option>
+                        </select>
+                        <button class="export-btn" id="export-towers">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Select Tower</th>
+                                <th>User ID</th>
+                                <th>Start Time</th>
+                                <th>Bandwidth</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tower-connections-table">
+                            <tr>
+                                <td>TWR-042</td>
+                                <td>USER-7894</td>
+                                <td>10:45 AM</td>
+                                <td>125 Mbps</td>
+                                <td><span class="status-badge status-resolved">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-017</td>
+                                <td>USER-3561</td>
+                                <td>09:30 AM</td>
+                                <td>87 Mbps</td>
+                                <td><span class="status-badge status-resolved">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-109</td>
+                                <td>USER-9023</td>
+                                <td>11:15 AM</td>
+                                <td>204 Mbps</td>
+                                <td><span class="status-badge status-resolved">Active</span></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-056</td>
+                                <td>USER-4452</td>
+                                <td>08:20 AM</td>
+                                <td>53 Mbps</td>
+                                <td><span class="status-badge status-progress">Slow</span></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-033</td>
+                                <td>USER-6731</td>
+                                <td>10:05 AM</td>
+                                <td>176 Mbps</td>
+                                <td><span class="status-badge status-resolved">Active</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Fault Management Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Fault Management</h2>
+                    </div>
+                    
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search Fault ID or Tower..." id="fault-search">
+                        </div>
+                        <select class="filter-select" id="fault-status-filter">
+                            <option>All Statuses</option>
+                            <option>Open</option>
+                            <option>In Progress</option>
+                            <option>Resolved</option>
+                        </select>
+                        <select class="filter-select" id="fault-type-filter">
+                            <option>All Issue Types</option>
+                            <option>Hardware</option>
+                            <option>Software</option>
+                            <option>Connectivity</option>
+                            <option>Power</option>
+                        </select>
+                        <button class="export-btn" id="export-faults">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fault ID</th>
+                                <th>Tower</th>
+                                <th>Issue Type</th>
+                                <th>Reported</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fault-management-table">
+                            <tr>
+                                <td>FLT-2023-001</td>
+                                <td>TWR-042</td>
+                                <td>Hardware</td>
+                                <td>2 hours ago</td>
+                                <td><span class="status-badge status-open">Open</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-002</td>
+                                <td>TWR-017</td>
+                                <td>Connectivity</td>
+                                <td>5 hours ago</td>
+                                <td><span class="status-badge status-progress">In Progress</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-003</td>
+                                <td>TWR-109</td>
+                                <td>Power</td>
+                                <td>1 day ago</td>
+                                <td><span class="status-badge status-open">Open</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-004</td>
+                                <td>TWR-056</td>
+                                <td>Software</td>
+                                <td>2 days ago</td>
+                                <td><span class="status-badge status-progress">In Progress</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-005</td>
+                                <td>TWR-033</td>
+                                <td>Hardware</td>
+                                <td>3 days ago</td>
+                                <td><span class="status-badge status-resolved">Resolved</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- Network Status Page -->
+            <div id="network-status-page" class="page-content hidden">
+                <div class="header">
+                    <h1>Network Status</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell-2">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar-2">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Map -->
+                <div class="network-map">
+                    <div class="section-header">
+                        <h2>Network Coverage Map</h2>
+                        <div>
+                            <button class="view-btn" id="refresh-map">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="map-container" id="network-map-container">
+                        <!-- Map will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Tower Status Section -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Tower Status</h2>
+                    </div>
+                    
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search Tower ID or Location..." id="tower-status-search">
+                        </div>
+                        <select class="filter-select" id="tower-status-filter">
+                            <option>All Statuses</option>
+                            <option>Online</option>
+                            <option>Offline</option>
+                            <option>Warning</option>
+                        </select>
+                        <button class="export-btn" id="export-tower-status">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tower ID</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Last Update</th>
+                                <th>Connected Users</th>
+                                <th>Bandwidth Usage</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tower-status-table">
+                            <tr>
+                                <td>TWR-042</td>
+                                <td>Johannesburg Central</td>
+                                <td><span class="status-badge status-resolved">Online</span></td>
+                                <td>5 minutes ago</td>
+                                <td>142</td>
+                                <td>78%</td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-017</td>
+                                <td>Pretoria North</td>
+                                <td><span class="status-badge status-open">Offline</span></td>
+                                <td>2 hours ago</td>
+                                <td>0</td>
+                                <td>0%</td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-109</td>
+                                <td>Midrand Hub</td>
+                                <td><span class="status-badge status-resolved">Online</span></td>
+                                <td>10 minutes ago</td>
+                                <td>87</td>
+                                <td>63%</td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-056</td>
+                                <td>Soweto West</td>
+                                <td><span class="status-badge status-progress">Warning</span></td>
+                                <td>30 minutes ago</td>
+                                <td>56</td>
+                                <td>92%</td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                            <tr>
+                                <td>TWR-033</td>
+                                <td>Randburg Sector</td>
+                                <td><span class="status-badge status-resolved">Online</span></td>
+                                <td>15 minutes ago</td>
+                                <td>121</td>
+                                <td>71%</td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- User Management Page -->
+            <div id="user-management-page" class="page-content hidden">
+                <div class="header">
+                    <h1>User Management</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell-3">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar-3">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>User Accounts</h2>
+                        <button class="view-btn">
+                            <i class="fas fa-plus"></i> Add User
+                        </button>
+                    </div>
+                    
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search by name or email..." id="user-search">
+                        </div>
+                        <select class="filter-select" id="user-role-filter">
+                            <option>All Users</option>
+                            <option>Admins</option>
+                            <option>Technicians</option>
+                            <option>Clients</option>
+                        </select>
+                        <select class="filter-select" id="user-status-filter">
+                            <option>All Statuses</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                            <option>Suspended</option>
+                        </select>
+                        <button class="export-btn" id="export-users">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <div class="user-list">
+                        <div class="user-card">
+                            <div class="user-avatar">SG</div>
+                            <div class="user-details">
+                                <h3>Sanele Gcaba</h3>
+                                <p>sanelegcaba52@gmail.com</p>
+                                <p>Senior Network Technician</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="view-btn">Edit</button>
+                                <button class="view-btn" style="background: var(--danger);">Delete</button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <div class="user-avatar">MT</div>
+                            <div class="user-details">
+                                <h3>Makwena Thubakgale</h3>
+                                <p>makwena.t@gmail.com</p>
+                                <p>Network Operations Manager</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="view-btn">Edit</button>
+                                <button class="view-btn" style="background: var(--danger);">Delete</button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <div class="user-avatar">TM</div>
+                            <div class="user-details">
+                                <h3>Tebogo Msiza</h3>
+                                <p>msizatebogo@gmail.com</p>
+                                <p>Client Support Specialist</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="view-btn">Edit</button>
+                                <button class="view-btn" style="background: var(--danger);">Delete</button>
+                            </div>
+                        </div>
+                        
+                        <div class="user-card">
+                            <div class="user-avatar">MK</div>
+                            <div class="user-details">
+                                <h3>Mathews Kutumela</h3>
+                                <p>matthewkutumela@gmail.com</p>
+                                <p>Network Engineer</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="view-btn">Edit</button>
+                                <button class="view-btn" style="background: var(--danger);">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Fault Reports Page -->
+            <div id="fault-reports-page" class="page-content hidden">
+                <div class="header">
+                    <h1>Fault Reports</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell-4">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar-4">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>All Fault Reports</h2>
+                        <button class="view-btn">
+                            <i class="fas fa-plus"></i> New Report
+                        </button>
+                    </div>
+                    
+                    <div class="search-filter">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search by Fault ID or Tower..." id="fault-report-search">
+                        </div>
+                        <select class="filter-select" id="fault-report-status-filter">
+                            <option>All Statuses</option>
+                            <option>Open</option>
+                            <option>In Progress</option>
+                            <option>Resolved</option>
+                        </select>
+                        <select class="filter-select" id="fault-report-priority-filter">
+                            <option>All Priorities</option>
+                            <option>Critical</option>
+                            <option>High</option>
+                            <option>Medium</option>
+                            <option>Low</option>
+                        </select>
+                        <button class="export-btn" id="export-fault-reports">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fault ID</th>
+                                <th>Reported By</th>
+                                <th>Tower</th>
+                                <th>Issue Type</th>
+                                <th>Priority</th>
+                                <th>Reported</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>FLT-2023-089</td>
+                                <td>Automated System</td>
+                                <td>TWR-017</td>
+                                <td>Hardware Failure</td>
+                                <td><span class="status-badge status-open">Critical</span></td>
+                                <td>2 hours ago</td>
+                                <td><span class="status-badge status-open">Open</span></td>
+                                <td><button class="view-btn">Assign</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-088</td>
+                                <td>Client Report</td>
+                                <td>TWR-109</td>
+                                <td>Connectivity Issues</td>
+                                <td><span class="status-badge status-progress">High</span></td>
+                                <td>5 hours ago</td>
+                                <td><span class="status-badge status-progress">In Progress</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-087</td>
+                                <td>Automated System</td>
+                                <td>TWR-042</td>
+                                <td>Power Supply</td>
+                                <td><span class="status-badge status-progress">High</span></td>
+                                <td>Yesterday</td>
+                                <td><span class="status-badge status-progress">In Progress</span></td>
+                                <td><button class="view-btn">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>FLT-2023-086</td>
+                                <td>Technician Report</td>
+                                <td>TWR-056</td>
+                                <td>Software Bug</td>
+                                <td><span class="status-badge" style="background: rgba(108, 117, 125, 0.15); color: var(--gray);">Medium</span></td>
+                                <td>2 days ago</td>
+                                <td><span class="status-badge status-resolved">Resolved</span></td>
+                                <td><button class="view-btn">Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics-page" class="page-content hidden">
+                <div class="header">
+                    <h1>Analytics</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell-5">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar-5">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Network Performance</h2>
+                        <div class="chart-options">
+                            <button class="active">Daily</button>
+                            <button>Weekly</button>
+                            <button>Monthly</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <p>Network Performance Chart (Would be implemented with Chart.js)</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>User Growth</h2>
+                        <div class="chart-options">
+                            <button class="active">Monthly</button>
+                            <button>Quarterly</button>
+                            <button>Yearly</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <p>User Growth Chart (Would be implemented with Chart.js)</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Fault Trends</h2>
+                        <div class="chart-options">
+                            <button class="active">By Type</button>
+                            <button>By Severity</button>
+                            <button>By Region</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <p>Fault Trends Chart (Would be implemented with Chart.js)</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="page-content hidden">
+                <div class="header">
+                    <h1>Settings</h1>
+                    <div class="header-actions">
+                        <div class="notification-bell" id="notification-bell-6">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count">3</span>
+                        </div>
+                        <div class="user-menu">
+                            <div class="user-info">
+                                <div class="user-name">Mathews Kutumela</div>
+                                <div class="user-role">System Administrator</div>
+                            </div>
+                            <div class="avatar" id="user-avatar-6">MK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="dashboard-section">
+                    <div class="settings-category">
+                        <h3>System Settings</h3>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Automatic Fault Detection</h4>
+                                <p>Enable automated monitoring and fault detection</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Email Notifications</h4>
+                                <p>Receive email alerts for critical issues</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>SMS Alerts</h4>
+                                <p>Receive SMS alerts for emergency situations</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-category">
+                        <h3>Display Settings</h3>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Dark Mode</h4>
+                                <p>Switch to dark color scheme</p>
+                            </div>
+                            <label class="toggle-switch" id="dark-mode-toggle-setting">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Auto-Refresh Data</h4>
+                                <p>Automatically refresh data every 5 minutes</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-category">
+                        <h3>Account Settings</h3>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Two-Factor Authentication</h4>
+                                <p>Add an extra layer of security to your account</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Email Reports</h4>
+                                <p>Receive daily summary reports via email</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle" id="dark-mode-toggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <script>
+        // DOM Elements
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const darkModeToggleSetting = document.getElementById('dark-mode-toggle-setting');
+        const body = document.body;
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const statCards = document.querySelectorAll('.stat-card');
+        const notificationBell = document.getElementById('notification-bell');
+        const notificationPanel = document.getElementById('notification-panel');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        const userAvatar = document.getElementById('user-avatar');
+        const profileModal = document.getElementById('profile-modal');
+        const cancelProfile = document.getElementById('cancel-profile');
+        const profileForm = document.getElementById('profile-form');
+        const pageContents = document.querySelectorAll('.page-content');
+        const refreshMapBtn = document.getElementById('refresh-map');
+        
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            body.classList.toggle('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('darkMode', 'enabled');
+                if (darkModeToggleSetting) {
+                    darkModeToggleSetting.querySelector('input').checked = true;
+                }
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('darkMode', 'disabled');
+                if (darkModeToggleSetting) {
+                    darkModeToggleSetting.querySelector('input').checked = false;
+                }
+            }
+        }
+
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        
+        if (darkModeToggleSetting) {
+            darkModeToggleSetting.addEventListener('click', toggleDarkMode);
+        }
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+            if (darkModeToggleSetting) {
+                darkModeToggleSetting.querySelector('input').checked = true;
+            }
+        }
+
+        // Navigation
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetPage = link.getAttribute('data-page');
+                
+                // Update active link
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // Show target page, hide others
+                pageContents.forEach(page => {
+                    if (page.id === `${targetPage}-page`) {
+                        page.classList.remove('hidden');
+                    } else {
+                        page.classList.add('hidden');
+                    }
+                });
+                
+                // If navigating to network status, generate the map
+                if (targetPage === 'network-status') {
+                    generateNetworkMap();
+                }
+            });
+        });
+
+        // Stat Cards Navigation
+        statCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const targetPage = card.getAttribute('data-page');
+                
+                // Update active link
+                navLinks.forEach(l => {
+                    l.classList.remove('active');
+                    if (l.getAttribute('data-page') === targetPage) {
+                        l.classList.add('active');
+                    }
+                });
+                
+                // Show target page, hide others
+                pageContents.forEach(page => {
+                    if (page.id === `${targetPage}-page`) {
+                        page.classList.remove('hidden');
+                    } else {
+                        page.classList.add('hidden');
+                    }
+                });
+                
+                // If navigating to network status, generate the map
+                if (targetPage === 'network-status') {
+                    generateNetworkMap();
+                }
+            });
+        });
+
+        // Notifications
+        const notificationBells = document.querySelectorAll('.notification-bell');
+        notificationBells.forEach(bell => {
+            bell.addEventListener('click', () => {
+                notificationPanel.classList.add('open');
+                updateNotificationCount(0);
+            });
+        });
+
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                notificationPanel.classList.remove('open');
+                profileModal.style.display = 'none';
+            });
+        });
+
+        // Profile Modal
+        const userAvatars = document.querySelectorAll('.avatar');
+        userAvatars.forEach(avatar => {
+            avatar.addEventListener('click', () => {
+                profileModal.style.display = 'flex';
+            });
+        });
+
+        cancelProfile.addEventListener('click', () => {
+            profileModal.style.display = 'none';
+        });
+
+        profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real app, you would save the profile changes here
+            alert('Profile updated successfully!');
+            profileModal.style.display = 'none';
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+            if (e.target === notificationPanel) {
+                notificationPanel.classList.remove('open');
+            }
+        });
+
+        // Update notification count
+        function updateNotificationCount(count) {
+            const notificationCounts = document.querySelectorAll('.notification-count');
+            notificationCounts.forEach(el => {
+                el.textContent = count;
+                el.style.display = count > 0 ? 'flex' : 'none';
+            });
+        }
+
+        // Generate sample notifications
+        function generateNotifications() {
+            const notifications = [
+                {
+                    type: 'critical',
+                    title: 'Tower TWR-017 is offline',
+                    message: 'The Pretoria North tower has been offline for 2 hours.',
+                    time: '10 minutes ago'
+                },
+                {
+                    type: 'warning',
+                    title: 'High bandwidth usage on TWR-056',
+                    message: 'Bandwidth usage has reached 92% on the Soweto West tower.',
+                    time: '45 minutes ago'
+                },
+                {
+                    type: 'info',
+                    title: 'Scheduled maintenance tonight',
+                    message: 'Network maintenance is scheduled from 2:00 AM to 4:00 AM.',
+                    time: '2 hours ago'
+                }
+            ];
+            
+            const notificationList = document.getElementById('notification-list');
+            notificationList.innerHTML = '';
+            
+            notifications.forEach(notification => {
+                const notificationEl = document.createElement('div');
+                notificationEl.className = `notification-item ${notification.type}`;
+                notificationEl.innerHTML = `
+                    <h4>${notification.title}</h4>
+                    <p>${notification.message}</p>
+                    <div class="notification-time">${notification.time}</div>
+                `;
+                notificationList.appendChild(notificationEl);
+            });
+        }
+
+        // Generate Network Map
+        function generateNetworkMap() {
+            const mapContainer = document.getElementById('network-map-container');
+            mapContainer.innerHTML = '';
+            
+            // Create a details panel
+            const detailsPanel = document.createElement('div');
+            detailsPanel.className = 'tower-details';
+            detailsPanel.id = 'tower-details';
+            mapContainer.appendChild(detailsPanel);
+            
+            // Generate random tower positions
+            const towers = [
+                { id: 'TWR-042', status: 'online', x: 30, y: 40 },
+                { id: 'TWR-017', status: 'offline', x: 70, y: 20 },
+                { id: 'TWR-109', status: 'online', x: 50, y: 70 },
+                { id: 'TWR-056', status: 'warning', x: 20, y: 60 },
+                { id: 'TWR-033', status: 'online', x: 80, y: 50 }
+            ];
+            
+            // Create towers
+            towers.forEach(tower => {
+                const towerEl = document.createElement('div');
+                towerEl.className = `tower-node ${tower.status}`;
+                towerEl.setAttribute('data-id', tower.id);
+                towerEl.style.left = `${tower.x}%`;
+                towerEl.style.top = `${tower.y}%`;
+                
+                towerEl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showTowerDetails(tower, towerEl);
+                });
+                
+                mapContainer.appendChild(towerEl);
+            });
+            
+            // Create connections between towers
+            for (let i = 0; i < towers.length; i++) {
+                for (let j = i + 1; j < towers.length; j++) {
+                    if (towers[i].status === 'online' && towers[j].status === 'online') {
+                        createConnection(towers[i], towers[j]);
+                    }
+                }
+            }
+            
+            // Hide details when clicking on the map
+            mapContainer.addEventListener('click', () => {
+                detailsPanel.style.display = 'none';
+            });
+        }
+        
+        function createConnection(tower1, tower2) {
+            const mapContainer = document.getElementById('network-map-container');
+            
+            // Calculate distance and angle between towers
+            const dx = tower2.x - tower1.x;
+            const dy = tower2.y - tower1.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            // Create connection line
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+            line.style.width = `${distance}%`;
+            line.style.left = `${tower1.x}%`;
+            line.style.top = `${tower1.y}%`;
+            line.style.transform = `rotate(${angle}deg)`;
+            
+            mapContainer.appendChild(line);
+        }
+        
+        function showTowerDetails(tower, element) {
+            const detailsPanel = document.getElementById('tower-details');
+            
+            // Sample tower data
+            const towerData = {
+                'TWR-042': {
+                    location: 'Johannesburg Central',
+                    users: 142,
+                    bandwidth: '78%',
+                    lastUpdate: '5 minutes ago'
+                },
+                'TWR-017': {
+                    location: 'Pretoria North',
+                    users: 0,
+                    bandwidth: '0%',
+                    lastUpdate: '2 hours ago'
+                },
+                'TWR-109': {
+                    location: 'Midrand Hub',
+                    users: 87,
+                    bandwidth: '63%',
+                    lastUpdate: '10 minutes ago'
+                },
+                'TWR-056': {
+                    location: 'Soweto West',
+                    users: 56,
+                    bandwidth: '92%',
+                    lastUpdate: '30 minutes ago'
+                },
+                'TWR-033': {
+                    location: 'Randburg Sector',
+                    users: 121,
+                    bandwidth: '71%',
+                    lastUpdate: '15 minutes ago'
+                }
+            };
+            
+            const data = towerData[tower.id];
+            
+            detailsPanel.innerHTML = `
+                <h4>${tower.id}</h4>
+                <p><strong>Location:</strong> ${data.location}</p>
+                <p><strong>Status:</strong> <span class="status-badge status-${tower.status === 'online' ? 'resolved' : tower.status === 'offline' ? 'open' : 'progress'}">${tower.status.charAt(0).toUpperCase() + tower.status.slice(1)}</span></p>
+                <p><strong>Connected Users:</strong> ${data.users}</p>
+                <p><strong>Bandwidth Usage:</strong> ${data.bandwidth}</p>
+                <p><strong>Last Update:</strong> ${data.lastUpdate}</p>
+            `;
+            
+            // Position the details panel near the tower
+            const rect = element.getBoundingClientRect();
+            const mapRect = document.getElementById('network-map-container').getBoundingClientRect();
+            
+            detailsPanel.style.left = `${rect.left - mapRect.left + 20}px`;
+            detailsPanel.style.top = `${rect.top - mapRect.top}px`;
+            detailsPanel.style.display = 'block';
+        }
+        
+        // Refresh Map Button
+        refreshMapBtn.addEventListener('click', generateNetworkMap);
+        
+        // Initialize the application
+        function initApp() {
+            generateNotifications();
+            
+            // Set up search functionality
+            const searchInputs = document.querySelectorAll('.search-box input');
+            searchInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const tableId = this.id.replace('search', 'table');
+                    const table = document.getElementById(tableId);
+                    if (table) {
+                        filterTable(table, this.value.toLowerCase());
+                    }
+                });
+            });
+            
+            // Set up export buttons
+            const exportButtons = document.querySelectorAll('.export-btn');
+            exportButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('Export functionality would be implemented here. In a real application, this would download a CSV or PDF file.');
+                });
+            });
+            
+            // Set up chart options buttons
+            const chartOptionsButtons = document.querySelectorAll('.chart-options button');
+            chartOptionsButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons in the same group
+                    const parent = this.parentElement;
+                    const siblings = parent.querySelectorAll('button');
+                    siblings.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                });
+            });
+        }
+        
+        // Simple table filtering
+        function filterTable(table, query) {
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

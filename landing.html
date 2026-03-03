@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> BDK Telecommunications Solutions</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0033a0',
+                        secondary: '#00a0e1',
+                        accent: '#ff8200',
+                        light: '#f5f7fa',
+                        dark: '#1a1a1a',
+                        gray: '#6c757d',
+                        lightGray: '#e9ecef',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lottie Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <!-- React and Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style type="text/css">
+        .gradient-bg {
+            background: linear-gradient(135deg, #0033a0 0%, #00a0e1 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .lottie-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Chatbot specific styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .chatbot-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0033a0 0%, #00a0e1 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+        
+        .chatbot-window.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #0033a0 0%, #00a0e1 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: #0033a0;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.bot {
+            align-self: flex-start;
+            background: #f0f4f8;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .chatbot-input {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .chatbot-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .chatbot-input button {
+            margin-left: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #0033a0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #6c757d;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        @media (max-width: 480px) {
+            .chatbot-window {
+                width: 300px;
+                height: 450px;
+            }
+            
+            .chatbot-container {
+                bottom: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Chatbot Component
+        const Chatbot = () => {
+            const [isOpen, setIsOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                {
+                    id: 1,
+                    text: "Hello! I'm BDK World's virtual assistant. How can I help you today?",
+                    sender: 'bot'
+                }
+            ]);
+            const [inputValue, setInputValue] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const messagesEndRef = useRef(null);
+            
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+            
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+            
+            const handleSendMessage = () => {
+                if (inputValue.trim() === '') return;
+                
+                // Add user message
+                const userMessage = {
+                    id: messages.length + 1,
+                    text: inputValue,
+                    sender: 'user'
+                };
+                
+                setMessages(prev => [...prev, userMessage]);
+                setInputValue('');
+                setIsTyping(true);
+                
+                // Simulate bot response after a delay
+                setTimeout(() => {
+                    const botResponse = generateBotResponse(inputValue);
+                    setMessages(prev => [...prev, {
+                        id: prev.length + 1,
+                        text: botResponse,
+                        sender: 'bot'
+                    }]);
+                    setIsTyping(false);
+                }, 1500);
+            };
+            
+            const generateBotResponse = (userMessage) => {
+                const message = userMessage.toLowerCase();
+                
+                if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                    return "Hello! Welcome to ADK World. How can I assist you with our telecommunications services?";
+                } else if (message.includes('service') || message.includes('solution')) {
+                    return "ADK World offers a range of telecommunications solutions including voice services, data connectivity, cloud solutions, and network infrastructure. Which area are you interested in?";
+                } else if (message.includes('contact') || message.includes('reach') || message.includes('email')) {
+                    return "You can reach us at contact@adkworld.com or call +27 11 123 4567. Our support team is available 24/7.";
+                } else if (message.includes('about') || message.includes('company')) {
+                    return "ABT World is a leading telecommunications provider in Africa, connecting communities with advanced network solutions for over 15 years.";
+                } else if (message.includes('price') || message.includes('cost') || message.includes('fee')) {
+                    return "Our pricing depends on the specific services you need. Could you tell me more about your requirements so I can connect you with the right specialist?";
+                } else if (message.includes('network') || message.includes('coverage')) {
+                    return "Our network covers major cities across Africa with 99.9% uptime guarantee. We're continuously expanding to rural areas to bridge the digital divide.";
+                } else if (message.includes('thank') || message.includes('thanks')) {
+                    return "You're welcome! Is there anything else I can help you with?";
+                } else {
+                    return "I understand you're asking about '" + userMessage + "'. Let me connect you with a specialist who can provide more detailed information. In the meantime, you can visit our Services page for more details.";
+                }
+            };
+            
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            };
+            
+            const toggleChat = () => {
+                setIsOpen(!isOpen);
+            };
+            
+            return (
+                <div className="chatbot-container">
+                    <div className={`chatbot-window ${isOpen ? 'open' : ''}`}>
+                        <div className="chatbot-header">
+                            <div>
+                                <h3 className="font-bold">ABT Assistant</h3>
+                                <p className="text-sm opacity-90">Online</p>
+                            </div>
+                            <button 
+                                onClick={toggleChat}
+                                className="text-white text-xl"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="chatbot-messages">
+                            {messages.map(message => (
+                                <div 
+                                    key={message.id} 
+                                    className={`message ${message.sender}`}
+                                >
+                                    {message.text}
+                                </div>
+                            ))}
+                            
+                            {isTyping && (
+                                <div className="typing-indicator">
+                                    <div className="message bot">
+                                        <div className="flex space-x-1">
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div ref={messagesEndRef} />
+                        </div>
+                        
+                        <div className="chatbot-input">
+                            <input 
+                                type="text" 
+                                placeholder="Type your message..." 
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                            />
+                            <button onClick={handleSendMessage}>
+                                <i className="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        className="chatbot-button"
+                        onClick={toggleChat}
+                    >
+                        {isOpen ? (
+                            <i className="fas fa-times text-xl"></i>
+                        ) : (
+                            <i className="fas fa-comments text-xl"></i>
+                        )}
+                    </button>
+                </div>
+            );
+        };
+
+        // Navigation Component
+        const Navigation = () => {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [userName, setUserName] = useState('');
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+            useEffect(() => {
+                const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                const name = localStorage.getItem('userName') || '';
+                setIsLoggedIn(loggedIn);
+                setUserName(name);
+            }, []);
+
+            const handleLogin = () => {
+                const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                if (loggedIn) {
+                    if (confirm('You are already logged in. Would you like to log out first?')) {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userName');
+                        setIsLoggedIn(false);
+                        setUserName('');
+                        window.location.href = 'login.html?forceLogin=true';
+                    }
+                } else {
+                    window.location.href = 'choose-role.html';
+                }
+            };
+
+            const handleRegister = () => {
+                const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+                if (loggedIn) {
+                    if (confirm('You are already logged in. Would you like to log out first?')) {
+                        localStorage.removeItem('isLoggedIn');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userName');
+                        setIsLoggedIn(false);
+                        setUserName('');
+                        window.location.href = 'register.html?forceRegister=true';
+                    }
+                } else {
+                    window.location.href = 'register.html';
+                }
+            };
+
+            const handleLogout = () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    setIsLoggedIn(false);
+                    setUserName('');
+                    alert('You have been logged out successfully.');
+                }
+            };
+
+            return (
+                <nav className="bg-white shadow-lg sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-20">
+                            <div className="flex items-center">
+                                <div className="flex-shrink-0 flex items-center">
+                                    
+                                </div>
+                                <div className="hidden md:ml-10 md:flex md:space-x-8">
+                                    <a href="landing.html" className="border-transparent text-gray-600 hover:border-accent hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-300">Home</a>
+                                    <a href="services.html" className="border-transparent text-gray-600 hover:border-accent hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-300">Services</a>
+                                    <a href="about.html" className="border-transparent text-gray-600 hover:border-accent hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-300">About</a>
+                                    <a href="contact.html" className="border-transparent text-gray-600 hover:border-accent hover:text-primary inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-300">Contact</a>
+                                </div>
+                            </div>
+                            <div className="hidden md:flex items-center space-x-3">
+                                {isLoggedIn ? (
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-primary font-medium">Hello, {userName}</span>
+                                        <button onClick={handleLogout} className="bg-transparent hover:bg-primary text-primary hover:text-white px-4 py-2 rounded-md border border-primary text-sm font-medium transition duration-300">Logout</button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button onClick={handleLogin} className="bg-transparent hover:bg-primary text-primary hover:text-white px-4 py-2 rounded-md border border-primary text-sm font-medium transition duration-300">Login</button>
+                                        <button onClick={handleRegister} className="bg-primary hover:bg-blue-900 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300 shadow-md">Register</button>
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex items-center md:hidden">
+                                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-primary focus:outline-none transition duration-300">
+                                    <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        {mobileMenuOpen ? (
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        ) : (
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                        )}
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile menu */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden animate-slide-up">
+                            <div className="pt-2 pb-3 space-y-1 bg-white shadow-xl rounded-b-lg">
+                                <a href="landing.html" className="block pl-3 pr-4 py-2 border-l-4 border-accent text-base font-medium text-primary bg-blue-50">Home</a>
+                                <a href="services.html" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:border-accent hover:text-primary">Services</a>
+                                <a href="#" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:border-accent hover:text-primary">About</a>
+                                <a href="#" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:border-accent hover:text-primary">Contact</a>
+                                <div className="pt-4 pb-3 border-t border-gray-200">
+                                    {isLoggedIn ? (
+                                        <div className="flex items-center px-4">
+                                            <div className="flex-shrink-0">
+                                                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                                                    {userName.charAt(0)}
+                                                </div>
+                                            </div>
+                                            <div className="ml-3">
+                                                <div className="text-base font-medium text-gray-800">{userName}</div>
+                                            </div>
+                                            <button onClick={handleLogout} className="ml-auto flex-shrink-0 bg-transparent p-1 text-gray-600 rounded-full hover:text-primary focus:outline-none">
+                                                <i className="fas fa-sign-out-alt"></i>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-3 space-y-3 px-2">
+                                            <button onClick={handleLogin} className="block w-full text-center bg-transparent text-primary px-4 py-2 rounded-md border border-primary text-base font-medium transition duration-300">Login</button>
+                                            <button onClick={handleRegister} className="block w-full text-center bg-primary text-white px-4 py-2 rounded-md text-base font-medium transition duration-300 shadow-md">Register</button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </nav>
+            );
+        };
+
+        // Hero Section Component
+        const HeroSection = () => {
+            const handleExploreClick = () => {
+                window.location.href = 'services.html#solutions';
+            };
+
+            return (
+                <section className="relative bg-gradient-to-br from-blue-50 to-white py-16 md:py-24 overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                        <div className="flex flex-col md:flex-row items-center">
+                            <div className="md:w-1/2 text-center md:text-left mb-12 md:mb-0 animate-slide-up">
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary leading-tight mb-6">
+                                    Connecting The World Through <span className="text-accent">Advanced</span> Telecommunications
+                                </h1>
+                                <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto md:mx-0">
+                                    ADK World provides cutting-edge telecom solutions to bridge the digital divide across the African continent.
+                                </p>
+                                <button onClick={handleExploreClick} className="bg-accent hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center mx-auto md:mx-0">
+                                    Explore Solutions
+                                    <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="md:w-1/2 flex justify-center animate-float">
+                                <div className="relative">
+                                    <div className="absolute -inset-8 bg-gradient-to-r from-primary to-secondary rounded-full blur-lg opacity-20"></div>
+                                    <div className="relative bg-white p-2 rounded-2xl shadow-2xl">
+                                        <div className="h-80 w-80 md:h-96 md:w-96 bg-blue-100 rounded-xl flex items-center justify-center">
+                                            <lottie-player
+                                                src="animations/server.json"
+                                                background="transparent"
+                                                speed="1"
+                                                loop
+                                                autoplay
+                                                style={{ width: '100%', height: '100%' }}
+                                            ></lottie-player>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Features Section Component
+        const FeaturesSection = () => {
+            return (
+                <section className="py-16 md:py-24 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row items-center">
+                            <div className="md:w-1/2 mb-12 md:mb-0">
+                                <div className="relative">
+                                    <div className="absolute -inset-6 bg-gradient-to-r from-primary to-secondary rounded-2xl blur-lg opacity-20"></div>
+                                    <div className="relative bg-lightGray p-8 rounded-2xl shadow-lg">
+                                        <div className="h-80 w-full bg-white rounded-xl flex items-center justify-center">
+                                            <lottie-player
+                                                src="animations/mini-network.json"
+                                                background="transparent"
+                                                speed="1"
+                                                loop
+                                                autoplay
+                                                style={{ width: '100%', height: '100%' }}
+                                            ></lottie-player>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="md:w-1/2 md:pl-12">
+                                <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Our Network Infrastructure</h2>
+                                <p className="text-lg text-gray-600 mb-8">
+                                    With over 15 years of experience, we've built a robust network infrastructure that covers major African cities and is expanding to rural areas.
+                                </p>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start">
+                                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-accent mr-3 mt-1">
+                                            <i className="fas fa-check-circle"></i>
+                                        </div>
+                                        <span className="text-gray-700 text-lg">99.9% Uptime Guarantee</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-accent mr-3 mt-1">
+                                            <i className="fas fa-check-circle"></i>
+                                        </div>
+                                        <span className="text-gray-700 text-lg">Low Latency Connections</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-accent mr-3 mt-1">
+                                            <i className="fas fa-check-circle"></i>
+                                        </div>
+                                        <span className="text-gray-700 text-lg">Scalable Solutions</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Facts Section Component
+        const FactsSection = () => {
+            const [currentSlide, setCurrentSlide] = useState(0);
+            const facts = [
+                "Africa's mobile money transaction volume reached $701.4 billion in 2021, showcasing the continent's rapid digital transformation.",
+                "Sub-Saharan Africa has the fastest growing mobile subscriber base in the world, expected to reach 615 million by 2025.",
+                "Fiber optic networks in Africa have expanded by over 50% in the last 5 years, enabling faster internet speeds across the continent.",
+                "The first telephone answering service started in 1923."
+            ];
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setCurrentSlide((prevSlide) => (prevSlide + 1) % facts.length);
+                }, 5000);
+                return () => clearInterval(interval);
+            }, [facts.length]);
+
+            const nextSlide = () => {
+                setCurrentSlide((prevSlide) => (prevSlide + 1) % facts.length);
+            };
+
+            const prevSlide = () => {
+                setCurrentSlide((prevSlide) => (prevSlide - 1 + facts.length) % facts.length);
+            };
+
+            const goToSlide = (index) => {
+                setCurrentSlide(index);
+            };
+
+            return (
+                <section className="py-16 md:py-24 bg-gradient-to-tr from-blue-50 to-gray-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row items-center">
+                            <div className="md:w-2/5 mb-12 md:mb-0">
+                                <div className="relative">
+                                    <div className="absolute -inset-6 bg-gradient-to-r from-primary to-secondary rounded-2xl blur-lg opacity-20"></div>
+                                    <div className="relative bg-white p-8 rounded-2xl shadow-lg">
+                                        <div className="h-80 w-full bg-blue-50 rounded-xl flex items-center justify-center">
+                                            <lottie-player
+                                                src="animations/technician.json"
+                                                background="transparent"
+                                                speed="1"
+                                                loop
+                                                autoplay
+                                                style={{ width: '100%', height: '100%' }}
+                                            ></lottie-player>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="md:w-3/5 md:pl-12">
+                                <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">Telecom Industry Facts</h2>
+                                <div className="bg-white p-8 rounded-2xl shadow-lg">
+                                    <div className="relative h-40 overflow-hidden">
+                                        {facts.map((fact, index) => (
+                                            <div key={index} className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
+                                                <p className="text-xl text-gray-700 italic">"{fact}"</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center justify-center mt-8">
+                                        <button onClick={prevSlide} className="p-2 rounded-full bg-blue-100 text-primary hover:bg-primary hover:text-white transition duration-300 mr-4">
+                                            <i className="fas fa-chevron-left"></i>
+                                        </button>
+                                        <div className="flex space-x-2">
+                                            {facts.map((_, index) => (
+                                                <button key={index} onClick={() => goToSlide(index)} className={`h-3 w-3 rounded-full transition duration-300 ${index === currentSlide ? 'bg-primary' : 'bg-gray-300'}`}></button>
+                                            ))}
+                                        </div>
+                                        <button onClick={nextSlide} className="p-2 rounded-full bg-blue-100 text-primary hover:bg-primary hover:text-white transition duration-300 ml-4">
+                                            <i className="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // Footer Component
+        const Footer = () => {
+            return (
+                <footer className="gradient-bg text-white pt-16 pb-8">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row justify-between">
+                            <div className="mb-10 md:mb-0">
+                                <div className="flex items-center mb-6">
+                                    
+                                </div>
+                                <p className="max-w-xs text-blue-100 mb-6">
+                                    Connecting The World through advanced telecommunications solutions and bridging the digital divide.
+                                </p>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center text-white hover:bg-accent transition duration-300">
+                                        <i className="fab fa-facebook-f"></i>
+                                    </a>
+                                    <a href="#" className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center text-white hover:bg-accent transition duration-300">
+                                        <i className="fab fa-twitter"></i>
+                                    </a>
+                                    <a href="#" className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center text-white hover:bg-accent transition duration-300">
+                                        <i className="fab fa-linkedin-in"></i>
+                                    </a>
+                                    <a href="#" className="h-10 w-10 rounded-full bg-blue-800 flex items-center justify-center text-white hover:bg-accent transition duration-300">
+                                        <i className="fab fa-instagram"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Company</h3>
+                                    <ul className="space-y-2">
+                                        <li><a href="about.html" className="text-blue-100 hover:text-white transition duration-300">About Us</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Careers</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">News</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Services</h3>
+                                    <ul className="space-y-2">
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Voice Solutions</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Data Solutions</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Cloud Services</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4">Support</h3>
+                                    <ul className="space-y-2">
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Contact Us</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">FAQs</a></li>
+                                        <li><a href="#" className="text-blue-100 hover:text-white transition duration-300">Documentation</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-blue-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                            <p className="text-blue-200 text-sm">© 2025 DBK World. All rights reserved.</p>
+                            <div className="flex space-x-6 mt-4 md:mt-0">
+                                <a href="#" className="text-blue-200 hover:text-white text-sm transition duration-300">Privacy Policy</a>
+                                <a href="#" className="text-blue-200 hover:text-white text-sm transition duration-300">Terms of Service</a>
+                                <a href="#" className="text-blue-200 hover:text-white text-sm transition duration-300">Cookie Policy</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Navigation />
+                    <main className="flex-grow">
+                        <HeroSection />
+                        <FeaturesSection />
+                        <FactsSection />
+                    </main>
+                    <Footer />
+                    <Chatbot />
+                </div>
+            );
+        };
+
+        // Render the App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

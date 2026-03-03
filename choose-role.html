@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT World - Select Your Role</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .question {
+            font-size: 28px;
+            color: #1a365d;
+            margin-bottom: 40px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .option {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .option-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+        
+        .client .option-icon {
+            background: rgba(0, 102, 204, 0.1);
+            color: #0066cc;
+        }
+        
+        .technician .option-icon {
+            background: rgba(255, 102, 0, 0.1);
+            color: #ff6600;
+        }
+        
+        .option-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a365d;
+            margin-bottom: 15px;
+        }
+        
+        .option-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .footer a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 700px) {
+            .options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .option {
+                max-width: 100%;
+            }
+            
+            .question {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="question">Which best describes you?</div>
+        
+        <div class="options">
+            <div class="option client" onclick="selectRole('client')">
+                <div class="option-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="option-title">Client</div>
+                <div class="option-desc">Report hardware faults and monitor resolution progress</div>
+            </div>
+            
+            <div class="option technician" onclick="selectRole('technician')">
+                <div class="option-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="option-title">Technician</div>
+                <div class="option-desc">Access the technician dashboard to manage fault tickets and resolutions</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 2025 ABK World. <a href="landing.html">Return to homepage</a>
+        </div>
+    </div>
+
+    <script>
+        function selectRole(role) {
+            // Store the selected role
+            localStorage.setItem('selectedRole', role);
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

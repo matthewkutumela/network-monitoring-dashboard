@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - ABK World</title>
+    
+    <!-- External Resources -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0055a5',
+                        secondary: '#ffcc00',
+                        dark: '#003a75',
+                        light: '#f8f9fa',
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-card, .feature-card {
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Utility Classes */
+        .gradient-bg {
+            background: linear-gradient(135deg, #0055a5 0%, #003a75 100%);
+        }
+
+        .hero-bg {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1500&q=80') 
+                        no-repeat center center/cover;
+        }
+
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .mobile-menu.open {
+            max-height: 500px;
+        }
+        
+        .testimonial-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #0055a5;
+        }
+
+        .logo-img {
+            height: 100px;
+            width: auto;
+            max-height: 110px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="font-poppins">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Custom Hooks
+        const useScrollAnimation = () => {
+            const [isVisible, setIsVisible] = React.useState(false);
+            const ref = React.useRef(null);
+
+            React.useEffect(() => {
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                            observer.unobserve(entry.target);
+                        }
+                    },
+                    { threshold: 0.1 }
+                );
+
+                if (ref.current) observer.observe(ref.current);
+
+                return () => {
+                    if (ref.current) observer.unobserve(ref.current);
+                };
+            }, []);
+
+            return [ref, isVisible];
+        };
+
+        const useMobileMenu = () => {
+            const [isOpen, setIsOpen] = React.useState(false);
+            const toggleMenu = () => setIsOpen(!isOpen);
+            return [isOpen, toggleMenu];
+        };
+
+        const useScrollVisibility = () => {
+            const [isVisible, setIsVisible] = React.useState(false);
+
+            React.useEffect(() => {
+                const handleScroll = () => setIsVisible(window.pageYOffset > 300);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return isVisible;
+        };
+
+        // Reusable Components
+        const AnimatedComponent = ({ children, className = '', delay = '' }) => {
+            const [ref, isVisible] = useScrollAnimation();
+            return (
+                <div ref={ref} className={`fade-in ${isVisible ? 'visible' : ''} ${className} ${delay}`}>
+                    {children}
+                </div>
+            );
+        };
+
+        const SectionHeader = ({ title, description, className = '' }) => (
+            <div className={`text-center mb-16 ${className}`}>
+                <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">{title}</h2>
+                <div className="w-20 h-1 bg-secondary mx-auto mb-6"></div>
+                <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
+            </div>
+        );
+
+        const CTAButton = ({ href, children, className = '' }) => (
+            <a href={href} className={`bg-secondary text-dark font-bold px-8 py-3 rounded-full inline-block hover:bg-yellow-500 transition-all transform hover:-translate-y-1 shadow-lg ${className}`}>
+                {children}
+            </a>
+        );
+
+        // Main Components
+        const Navbar = () => {
+            const [isScrolled, setIsScrolled] = React.useState(false);
+            const [isMenuOpen, toggleMenu] = useMobileMenu();
+
+            React.useEffect(() => {
+                const handleScroll = () => setIsScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const navLinks = [
+                { href: "landing.html", text: "Home" },
+                { href: "services.html", text: "Services", active: true },
+                { href: "about.html", text: "About" },
+                { href: "contact.html", text: "Contact" }
+            ];
+
+            const NavLink = ({ href, text, active = false }) => (
+                <a href={href} className={`font-medium transition-colors ${active ? 'text-primary border-b-2 border-primary' : 'text-gray-700 hover:text-primary'}`}>
+                    {text}
+                </a>
+            );
+
+            return (
+                <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-lg py-2' : 'bg-transparent py-4'}`}>
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="flex justify-between items-center">
+                            
+                            <div className="hidden md:flex items-center space-x-8">
+                                {navLinks.map(link => <NavLink key={link.text} {...link} />)}
+                            </div>
+                            
+                            <button onClick={toggleMenu} className="md:hidden text-gray-700 focus:outline-none">
+                                <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'} text-2xl`}></i>
+                            </button>
+                        </div>
+                        
+                        <div className={`mobile-menu md:hidden bg-white rounded-lg mt-2 shadow-lg ${isMenuOpen ? 'open' : ''}`}>
+                            <div className="flex flex-col space-y-4 p-4">
+                                {navLinks.map(link => <NavLink key={link.text} {...link} />)}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        const Hero = () => (
+            <section className="hero-bg text-white pt-32 pb-20">
+                <div className="container mx-auto px-4 text-center">
+                    <AnimatedComponent>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-6">Comprehensive IT Solutions</h1>
+                    </AnimatedComponent>
+                    <AnimatedComponent className="delay-200">
+                        <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-10">
+                            We provide cutting-edge technology services to help your business thrive in the digital age.
+                        </p>
+                    </AnimatedComponent>
+                    <AnimatedComponent className="delay-500">
+                        <CTAButton href="#services" className="animate-pulse">
+                            Explore Our Services
+                        </CTAButton>
+                    </AnimatedComponent>
+                </div>
+            </section>
+        );
+
+        const Services = () => {
+            const services = [
+                { icon: 'fas fa-network-wired', title: 'Network Infrastructure', description: 'Design, implementation and management of robust network solutions for businesses of all sizes.' },
+                { icon: 'fas fa-shield-alt', title: 'Cybersecurity', description: 'Comprehensive security solutions to protect your data and systems from modern threats.' },
+                { icon: 'fas fa-cloud', title: 'Cloud Services', description: 'Secure and scalable cloud solutions tailored to your business requirements.' },
+                { icon: 'fas fa-server', title: 'Managed IT Services', description: 'Proactive IT management and support to keep your systems running smoothly.' },
+                { icon: 'fas fa-phone-alt', title: 'Unified Communications', description: 'Integrated communication solutions to enhance collaboration and productivity.' },
+                { icon: 'fas fa-database', title: 'Data Center Solutions', description: 'Reliable and efficient data center services for business-critical operations.' }
+            ];
+
+            const ServiceCard = ({ icon, title, description, delay }) => (
+                <AnimatedComponent className={delay}>
+                    <div className="service-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <div className="gradient-bg text-white text-4xl p-8 text-center">
+                            <i className={`${icon} animate-float`}></i>
+                        </div>
+                        <div className="p-8">
+                            <h3 className="text-xl font-bold text-primary mb-4">{title}</h3>
+                            <p className="text-gray-600 mb-6">{description}</p>
+                            <a href="#" className="text-primary font-semibold flex items-center group">
+                                Learn more <i className="fas fa-arrow-right ml-2 transition-transform group-hover:translate-x-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </AnimatedComponent>
+            );
+
+            return (
+                <section id="services" className="py-20 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <AnimatedComponent>
+                            <SectionHeader 
+                                title="Our Services" 
+                                description="We offer a wide range of IT services and solutions to meet your business needs" 
+                            />
+                        </AnimatedComponent>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {services.map((service, index) => (
+                                <ServiceCard key={index} {...service} delay={`delay-${index * 100}`} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Features = () => {
+            const features = [
+                { icon: 'fas fa-award', title: 'Expertise', description: 'Our team consists of certified professionals with extensive industry experience.' },
+                { icon: 'fas fa-headset', title: '24/7 Support', description: 'Round-the-clock technical support to address your IT issues promptly.' },
+                { icon: 'fas fa-lightbulb', title: 'Innovation', description: 'We stay ahead of technology trends to provide cutting-edge solutions.' }
+            ];
+
+            const FeatureCard = ({ icon, title, description, delay }) => (
+                <AnimatedComponent className={delay}>
+                    <div className="feature-card bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-8 text-center border border-white border-opacity-20 hover:bg-opacity-20 transition-all duration-300">
+                        <div className="w-20 h-20 rounded-full gradient-bg flex items-center justify-center text-3xl mx-auto mb-6 animate-pulse-slow">
+                            <i className={icon}></i>
+                        </div>
+                        <h3 className="text-xl font-bold mb-4">{title}</h3>
+                        <p>{description}</p>
+                    </div>
+                </AnimatedComponent>
+            );
+
+            return (
+                <section className="py-20 gradient-bg text-white">
+                    <div className="container mx-auto px-4">
+                        <AnimatedComponent>
+                            <SectionHeader 
+                                title="Why Choose Us" 
+                                description="We are committed to delivering exceptional IT services that drive your business forward"
+                                className="text-white"
+                            />
+                        </AnimatedComponent>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {features.map((feature, index) => (
+                                <FeatureCard key={index} {...feature} delay={`delay-${index * 100}`} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Testimonials = () => {
+            const testimonials = [
+                { name: "Mathews Kutumela", company: "TechCorp Inc.", content: "ABK World transformed our IT infrastructure. Their team was professional, efficient, and delivered beyond our expectations.", avatar: "client1.jpeg" },
+                { name: "Sandile Kunene", company: "Global Solutions Ltd.", content: "The cybersecurity solutions provided by ABK World have given us peace of mind. Our data has never been more secure.", avatar: "client2.jpeg" },
+                { name: "Andries Kutumela", company: "Innovate Enterprises", content: "Their cloud services have allowed us to scale effortlessly. The migration was seamless with minimal downtime.", avatar: "client3.jpeg" }
+            ];
+
+            const TestimonialCard = ({ name, company, content, avatar, delay }) => (
+                <AnimatedComponent className={delay}>
+                    <div className="bg-gray-50 rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <div className="flex items-center mb-6">
+                            <img src={avatar} alt={name} className="testimonial-avatar mr-4" />
+                            <div>
+                                <h4 className="font-bold text-primary">{name}</h4>
+                                <p className="text-gray-600 text-sm">{company}</p>
+                            </div>
+                        </div>
+                        <p className="text-gray-700 italic">"{content}"</p>
+                        <div className="flex text-secondary mt-4">
+                            {[...Array(5)].map((_, i) => <i key={i} className="fas fa-star"></i>)}
+                        </div>
+                    </div>
+                </AnimatedComponent>
+            );
+
+            return (
+                <section className="py-20 bg-white">
+                    <div className="container mx-auto px-4">
+                        <AnimatedComponent>
+                            <SectionHeader 
+                                title="What Our Clients Say" 
+                                description="Hear from businesses that have transformed their operations with our solutions" 
+                            />
+                        </AnimatedComponent>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {testimonials.map((testimonial, index) => (
+                                <TestimonialCard key={index} {...testimonial} delay={`delay-${index * 100}`} />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const CTA = () => (
+            <section className="py-20 gradient-bg text-white">
+                <div className="container mx-auto px-4 text-center">
+                    <AnimatedComponent>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Your IT Infrastructure?</h2>
+                    </AnimatedComponent>
+                    <AnimatedComponent className="delay-200">
+                        <p className="text-xl max-w-2xl mx-auto mb-10">
+                            Contact us today to discuss how we can help your business achieve its technology goals
+                        </p>
+                    </AnimatedComponent>
+                    <AnimatedComponent className="delay-500">
+                        <CTAButton href="#" className="hover:shadow-xl">
+                            Get in Touch
+                        </CTAButton>
+                    </AnimatedComponent>
+                </div>
+            </section>
+        );
+
+        const Footer = () => {
+            const footerSections = {
+                services: ["Network Infrastructure", "Cybersecurity", "Cloud Services", "Managed IT Services", "Unified Communications"],
+                links: [
+                    { href: "landing.html", text: "Home" },
+                    { href: "services.html", text: "Services" },
+                    { href: "services.html", text: "Solutions" },
+                    { href: "about.html", text: "About Us" },
+                    { href: "contact.html", text: "Contact" }
+                ],
+                contact: [
+                    { icon: "fas fa-map-marker-alt", text: "204 Rivonia Rd, Johannesburg, South Africa" },
+                    { icon: "fas fa-phone", text: "+27 11 123 4567" },
+                    { icon: "fas fa-envelope", text: "info@abtworld.co.za" }
+                ],
+                social: ["facebook-f", "twitter", "linkedin-in", "instagram"]
+            };
+
+            const FooterSection = ({ title, children }) => (
+                <div>
+                    <h3 className="text-lg font-bold mb-6 relative pb-2 after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-10 after:h-0.5 after:bg-secondary">{title}</h3>
+                    {children}
+                </div>
+            );
+
+            return (
+                <footer className="bg-gray-900 text-white pt-16 pb-8">
+                    <div className="container mx-auto px-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                            <div>
+                                
+                                <p className="text-gray-400 mb-6">
+                                    We provide comprehensive IT solutions to businesses across South Africa, helping them leverage technology for growth and success.
+                                </p>
+                                <div className="flex space-x-4">
+                                    {footerSections.social.map(platform => (
+                                        <a key={platform} href="#" className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                                            <i className={`fab fa-${platform}`}></i>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <FooterSection title="Services">
+                                <ul className="space-y-3">
+                                    {footerSections.services.map(service => (
+                                        <li key={service}>
+                                            <a href="#" className="text-gray-400 hover:text-white transition-colors">{service}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FooterSection>
+                            
+                            <FooterSection title="Quick Links">
+                                <ul className="space-y-3">
+                                    {footerSections.links.map(link => (
+                                        <li key={link.text}>
+                                            <a href={link.href} className="text-gray-400 hover:text-white transition-colors">{link.text}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FooterSection>
+                            
+                            <FooterSection title="Contact Us">
+                                <ul className="space-y-4">
+                                    {footerSections.contact.map((item, index) => (
+                                        <li key={index} className="flex items-start">
+                                            <i className={`${item.icon} text-secondary mt-1 mr-3`}></i>
+                                            <span className="text-gray-400">{item.text}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </FooterSection>
+                        </div>
+                        
+                        <div className="border-t border-gray-800 pt-8 text-center">
+                            <p className="text-gray-400">&copy; 2025 ABK World. All rights reserved.</p>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        const ScrollToTop = () => {
+            const isVisible = useScrollVisibility();
+
+            const scrollToTop = () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            return isVisible ? (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-6 right-6 w-12 h-12 rounded-full gradient-bg text-white shadow-lg flex items-center justify-center z-40 hover:animate-pulse focus:outline-none transition-transform hover:scale-110"
+                    aria-label="Scroll to top"
+                >
+                    <i className="fas fa-arrow-up"></i>
+                </button>
+            ) : null;
+        };
+
+        // Main App Component
+        const ServicesPage = () => (
+            <div className="overflow-x-hidden">
+                <Navbar />
+                <Hero />
+                <Services />
+                <Features />
+                <Testimonials />
+                <CTA />
+                <Footer />
+                <ScrollToTop />
+            </div>
+        );
+
+        // Render the application
+        ReactDOM.render(<ServicesPage />, document.getElementById('root'));
+    </script>
+</body>
+</html>

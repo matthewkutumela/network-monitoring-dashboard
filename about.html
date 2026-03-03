@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Network Monitoring System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a365d',   
+                        secondary: '#2c5282',  
+                        accent: '#d69e2e',     
+                        light: '#e2e8f0',      
+                        dark: '#2d3748',       
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .hero-pattern {
+            background-color: #1a365d;
+            background-image: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .team-member:hover img {
+            transform: scale(1.05);
+        }
+        
+        .gradient-border {
+            position: relative;
+            border-radius: 0.5rem;
+        }
+        
+        .gradient-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #1a365d, #d69e2e, #2c5282);
+            border-radius: 0.6rem;
+            z-index: -1;
+        }
+        
+        .logo-img {
+            height: 70px;
+            width: auto;
+        }
+        
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            max-height: 400px;
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .image-container:hover img {
+            transform: scale(1.03);
+        }
+        
+        @media (max-width: 768px) {
+            .image-container {
+                max-height: 350px;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header/Navigation -->
+    <header class="bg-primary shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="text-white text-2xl font-bold">
+                       
+                    </div>
+                </div>
+                <nav class="hidden md:block">
+                    <ul class="flex space-x-8">
+                        <li><a href="landing.html" class="text-light hover:text-accent transition">Home</a></li>
+                        <li><a href="about.html" class="text-light hover:text-accent transition">About</a></li>
+                        <li><a href="services.html" class="text-light hover:text-accent transition">Services</a></li>
+                        <li><a href="contact.html" class="text-light hover:text-accent transition">Contact</a></li>
+                    </ul>
+                </nav>
+                <button class="md:hidden text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-pattern text-white py-16 md:py-24">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">About Our Network Monitoring System</h1>
+            <p class="text-xl max-w-3xl mx-auto mb-8">Providing enterprise-grade network monitoring and management solutions for businesses of all sizes.</p>
+            <button class="bg-accent hover:bg-yellow-600 text-primary font-semibold py-3 px-8 rounded-lg transition duration-300">
+                Get Started
+            </button>
+        </div>
+    </section>
+
+    <!-- About Content Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-stretch">
+                <div class="md:w-1/2 mb-10 md:mb-0 md:pr-8 flex flex-col justify-center">
+                    <h2 class="text-3xl font-bold text-primary mb-6">Who We Are</h2>
+                    <p class="text-dark mb-4">We are a team of network specialists dedicated to providing the most reliable monitoring solutions for your IT infrastructure.</p>
+                    <p class="text-dark mb-6">Our system helps businesses maintain optimal network performance, prevent downtime, and secure their digital assets.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <div class="bg-light p-4 rounded-lg text-center flex-1">
+                            <i class="fas fa-chart-line text-3xl text-accent mb-2"></i>
+                            <p class="font-semibold">Performance</p>
+                        </div>
+                        <div class="bg-light p-4 rounded-lg text-center flex-1">
+                            <i class="fas fa-shield-alt text-3xl text-accent mb-2"></i>
+                            <p class="font-semibold">Security</p>
+                        </div>
+                        <div class="bg-light p-4 rounded-lg text-center flex-1">
+                            <i class="fas fa-bolt text-3xl text-accent mb-2"></i>
+                            <p class="font-semibold">Uptime</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="image-container">
+                        <img src="WhoWeAre.jpg" alt="Network Monitoring Dashboard">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-primary text-center mb-12">Why Choose Our Solution</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card transition duration-300">
+                    <div class="text-5xl text-accent mb-4">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">Comprehensive Monitoring</h3>
+                    <p class="text-dark">Monitor servers, network devices, applications, and cloud services from a single dashboard.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card transition duration-300">
+                    <div class="text-5xl text-accent mb-4">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">Real-time Alerts</h3>
+                    <p class="text-dark">Get instant notifications via email, SMS, or mobile app when issues are detected.</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-md stat-card transition duration-300">
+                    <div class="text-5xl text-accent mb-4">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary mb-3">Detailed Reporting</h3>
+                    <p class="text-dark">Generate comprehensive reports on network performance, usage trends, and security events.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-primary text-center mb-4">Our Team</h2>
+            <p class="text-dark text-center max-w-2xl mx-auto mb-12">Meet the experts behind our network monitoring and management system</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="team-member text-center bg-light p-6 rounded-xl transition duration-300">
+                    <div class="rounded-full overflow-hidden mx-auto mb-4 w-32 h-32 border-4 border-white shadow-lg">
+                    
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary">Sanele Mkhwanazi</h3>
+                    <p class="text-accent mb-3">CEO & Founder</p>
+                    <p class="text-dark text-sm">Network security expert</p>
+                </div>
+                
+                <div class="team-member text-center bg-light p-6 rounded-xl transition duration-300">
+                    <div class="rounded-full overflow-hidden mx-auto mb-4 w-32 h-32 border-4 border-white shadow-lg">
+                        
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary">Omphemetse Kutumela</h3>
+                    <p class="text-accent mb-3">Lead Developer</p>
+                    <p class="text-dark text-sm">Full-stack developer specializing in network applications</p>
+                </div>
+                
+                <div class="team-member text-center bg-light p-6 rounded-xl transition duration-300">
+                    <div class="rounded-full overflow-hidden mx-auto mb-4 w-32 h-32 border-4 border-white shadow-lg">
+                        
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary">Tebogo Masemola</h3>
+                    <p class="text-accent mb-3">Network Architect</p>
+                    <p class="text-dark text-sm">Designs robust network infrastructures for enterprise clients</p>
+                </div>
+                
+                <div class="team-member text-center bg-light p-6 rounded-xl transition duration-300">
+                    <div class="rounded-full overflow-hidden mx-auto mb-4 w-32 h-32 border-4 border-white shadow-lg">
+                    
+                    </div>
+                    <h3 class="text-xl font-semibold text-primary">Raven Matthews</h3>
+                    <p class="text-accent mb-3">Support Manager</p>
+                    <p class="text-dark text-sm">Leads our 24/7 customer support and implementation teams</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 hero-pattern">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Enhance Your Network Monitoring?</h2>
+            <p class="text-light text-xl max-w-2xl mx-auto mb-8">Get started with our comprehensive network monitoring and management system today.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button class="bg-accent hover:bg-yellow-600 text-primary font-semibold py-3 px-8 rounded-lg transition duration-300">
+                    Free Trial
+                </button>
+                <button class="bg-transparent hover:bg-secondary text-white font-semibold py-3 px-8 rounded-lg border-2 border-white transition duration-300">
+                    Contact Sales
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">
+                        
+                    </h3>
+                    <p class="text-light">Enterprise-grade network monitoring and management solutions.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="landing.html" class="text-light hover:text-accent transition">Home</a></li>
+                        <li><a href="services.html" class="text-light hover:text-accent transition">Services</a></li>
+                        <li><a href="about.html" class="text-light hover:text-accent transition">About Us</a></li>
+                        <li><a href="contact.html" class="text-light hover:text-accent transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-light hover:text-accent transition">Network Monitoring</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Performance Management</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Security Solutions</a></li>
+                        <li><a href="#" class="text-light hover:text-accent transition">Cloud Integration</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact Us</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-accent"></i>
+                            <span class="text-light">204 Rivonia Rd, Johannesburg</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-2 text-accent"></i>
+                            <span class="text-light">+27 11 123 4567</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2 text-accent"></i>
+                            <span class="text-light">info@abtworld.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-secondary mt-8 pt-8 text-center text-light">
+                <p>&copy; 2025 ABKWorld. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
